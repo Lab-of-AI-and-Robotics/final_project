@@ -210,3 +210,22 @@ uv run --extra isaacsim --no-sync python ../final_project/scripts/rsl_rl/play.py
 ```
 
 The camera follows the robot. Press Ctrl+C in the terminal to stop playback.
+
+### 1.3. Editing PPO
+
+The PPO implementation is in the separate rsl_rl checkout:
+
+```text
+rl_final_project_isaaclab_2026/rsl_rl/rsl_rl/algorithms/ppo.py
+```
+
+The course's PPO configuration is located at:
+
+```text
+final_project/source/final_project/final_project/tasks/manager_based/final_project/agents/rsl_rl_ppo_cfg.py
+```
+
+Because rsl_rl is installed in editable mode, source changes take effect when
+you start a new training process. You do not need to reinstall the package after
+each source edit. An already-running process continues using the code it loaded
+at startup.
