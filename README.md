@@ -54,23 +54,32 @@ The commands below use that environment through `uv run`.
 #### 1.1.2. Project directory and Isaac Lab
 
 Choose an SSD with enough free space for Isaac Sim, the Python environment,
-and download caches. The example project root is `~/Projects/rl_final_project_isaaclab_2026`.
+and download caches. Open a terminal in any directory where you want to keep
+the project, then create the project root:
 
 ```bash
-mkdir -p ~/Projects/rl_final_project_isaaclab_2026
-cd ~/Projects/rl_final_project_isaaclab_2026
+mkdir -p rl_final_project_isaaclab_2026
+cd rl_final_project_isaaclab_2026
+```
 
+Throughout this guide, **project root** means this `rl_final_project_isaaclab_2026`
+directory. Paths are relative to the project root unless a different working
+directory is stated. Follow the installation sections in order in the same
+terminal; each `cd` command continues from the previous section.
+
+From the project root, clone Isaac Lab:
+
+```bash
 git clone --branch v3.0.0 --depth 1 \
   https://github.com/isaac-sim/IsaacLab.git
 ```
 
 #### 1.1.3. Editable rsl_rl installation and Isaac Sim
 
-Clone the course version of rsl_rl into a separate sibling directory:
+Working directory: project root. Clone the course version of rsl_rl alongside
+Isaac Lab:
 
 ```bash
-cd ~/Projects/rl_final_project_isaaclab_2026
-
 git clone --branch v5.5.1 --depth 1 \
   https://github.com/leggedrobotics/rsl_rl.git
 
@@ -80,7 +89,7 @@ git -C rsl_rl switch -c course-2026
 Register that checkout as an editable dependency and install the environment:
 
 ```bash
-cd ~/Projects/rl_final_project_isaaclab_2026/IsaacLab
+cd IsaacLab
 
 uv python install 3.12.16
 uv python pin 3.12.16
@@ -109,7 +118,8 @@ rl_final_project_isaaclab_2026/rsl_rl/rsl_rl/__init__.py
 
 #### 1.1.4. Verify the simulator
 
-Run the empty-scene tutorial from the `IsaacLab` directory:
+Working directory: `IsaacLab/`. Stay in this directory and run the empty-scene
+tutorial:
 
 ```bash
 uv run --extra isaacsim --no-sync python \
@@ -121,10 +131,10 @@ stop the example with Ctrl+C in the terminal.
 
 #### 1.1.5. Install the final project
 
-Clone the course branch:
+Return from `IsaacLab/` to the project root and clone the course branch:
 
 ```bash
-cd ~/Projects/rl_final_project_isaaclab_2026
+cd ..
 
 git clone --branch course-2026 \
   https://github.com/Lab-of-AI-and-Robotics/final_project.git
@@ -133,7 +143,7 @@ git clone --branch course-2026 \
 Install it into the Isaac Lab environment:
 
 ```bash
-cd ~/Projects/rl_final_project_isaaclab_2026/IsaacLab
+cd IsaacLab
 
 uv add --editable ../final_project/source/final_project --no-sync
 uv sync --extra isaacsim
@@ -157,10 +167,13 @@ used for this course.
 
 ### 1.2. Training and Inference
 
-Run all commands in this section from:
+Working directory for all commands in this section: `IsaacLab/`. You are
+already in this directory after Section 1.1.5.
+
+If starting from the project root in a new terminal, enter it with:
 
 ```bash
-cd ~/Projects/rl_final_project_isaaclab_2026/IsaacLab
+cd IsaacLab
 ```
 
 #### 1.2.1. Short installation check
@@ -189,18 +202,27 @@ uv run --extra isaacsim --no-sync python ../final_project/scripts/rsl_rl/train.p
 ```
 
 Training logs and checkpoints are saved under
-`logs/rsl_rl/go2_managerbased/<RUN_FOLDER>/`. Checkpoints use the standard
+`IsaacLab/logs/rsl_rl/go2_managerbased/<RUN_FOLDER>/`, relative to the project
+root. Checkpoints use the standard
 rsl_rl saving behavior with a 50-iteration interval. A completed 300-iteration
 run produces the final checkpoint `model_299.pt`.
 
 #### 1.2.3. Inference
 
-Replace the checkpoint path below with the path from your training run:
+Working directory: `IsaacLab/`. List the training run folders:
+
+```bash
+ls logs/rsl_rl/go2_managerbased/
+```
+
+Choose the run from Section 1.2.2 and replace `<RUN_FOLDER>` below with its
+actual folder name. The checkpoint path is relative to the current working
+directory, `IsaacLab/`:
 
 ```bash
 uv run --extra isaacsim --no-sync python ../final_project/scripts/rsl_rl/play.py \
   --task Template-Final-Project-Play-v0 \
-  --checkpoint /absolute/path/to/model_299.pt \
+  --checkpoint "logs/rsl_rl/go2_managerbased/<RUN_FOLDER>/model_299.pt" \
   --num_envs 1 --viz kit --real-time \
   physics=isaacsim_physx \
   'env.viewer.eye=[3.0,3.0,2.0]' \
@@ -213,10 +235,11 @@ The camera follows the robot. Press Ctrl+C in the terminal to stop playback.
 
 ### 1.3. Editing PPO
 
+The following source paths are relative to the project root.
 The PPO implementation is in the separate rsl_rl checkout:
 
 ```text
-rl_final_project_isaaclab_2026/rsl_rl/rsl_rl/algorithms/ppo.py
+rsl_rl/rsl_rl/algorithms/ppo.py
 ```
 
 The course's PPO configuration is located at:
