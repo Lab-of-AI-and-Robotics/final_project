@@ -1,135 +1,83 @@
-# Template for Isaac Lab Projects
+# RL final project: Go2 locomotion (2026)
 
-## Overview
+This course project uses Isaac Lab 3.0.0, Isaac Sim 6.2.0.0, Python 3.12,
+and a sibling editable checkout of rsl_rl 5.5.1.
 
-This project/repository serves as a template for building projects or extensions based on Isaac Lab.
-It allows you to develop in an isolated environment, outside of the core Isaac Lab repository.
+The course task remains `Template-Final-Project-v0`: Go2 velocity tracking on
+flat terrain. Its environment, rewards, reset settings, and PPO hyperparameters
+match the official Go2 Flat baseline in pinned Isaac Lab 3.0.0, with Isaac Sim
+PhysX selected explicitly. The editable course configuration files remain in
+this repository. Log names remain course-specific, and checkpoints use the
+default RSL-RL behavior with a 50-iteration save interval.
 
-**Key Features:**
+## Install into the existing Isaac Lab environment
 
-- `Isolation` Work outside the core Isaac Lab repository, ensuring that your development efforts remain self-contained.
-- `Flexibility` This template is set up to allow your code to be run as an extension in Omniverse.
+Expected sibling directories:
 
-**Keywords:** extension, template, isaaclab
+```text
+rl_final_project_isaaclab_2026/
+  IsaacLab/       # v3.0.0, with its .venv
+  rsl_rl/         # v5.5.1, editable
+  final_project/  # this repository
+```
 
-## Installation
-
-- Install Isaac Lab by following the [installation guide](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html).
-  We recommend using the conda or uv installation as it simplifies calling Python scripts from the terminal.
-
-- Clone or copy this project/repository separately from the Isaac Lab installation (i.e. outside the `IsaacLab` directory):
-
-- Using a python interpreter that has Isaac Lab installed, install the library in editable mode using:
-
-    ```bash
-    # use 'PATH_TO_isaaclab.sh|bat -p' instead of 'python' if Isaac Lab is not installed in Python venv or conda
-    python -m pip install -e source/final_project
-
-- Verify that the extension is correctly installed by:
-
-    - Listing the available tasks:
-
-        Note: It the task name changes, it may be necessary to update the search pattern `"Template-"`
-        (in the `scripts/list_envs.py` file) so that it can be listed.
-
-        ```bash
-        # use 'FULL_PATH_TO_isaaclab.sh|bat -p' instead of 'python' if Isaac Lab is not installed in Python venv or conda
-        python scripts/list_envs.py
-        ```
-
-    - Running a task:
-
-        ```bash
-        # use 'FULL_PATH_TO_isaaclab.sh|bat -p' instead of 'python' if Isaac Lab is not installed in Python venv or conda
-        python scripts/<RL_LIBRARY>/train.py --task=<TASK_NAME>
-        ```
-
-    - Running a task with dummy agents:
-
-        These include dummy agents that output zero or random agents. They are useful to ensure that the environments are configured correctly.
-
-        - Zero-action agent
-
-            ```bash
-            # use 'FULL_PATH_TO_isaaclab.sh|bat -p' instead of 'python' if Isaac Lab is not installed in Python venv or conda
-            python scripts/zero_agent.py --task=<TASK_NAME>
-            ```
-        - Random-action agent
-
-            ```bash
-            # use 'FULL_PATH_TO_isaaclab.sh|bat -p' instead of 'python' if Isaac Lab is not installed in Python venv or conda
-            python scripts/random_agent.py --task=<TASK_NAME>
-            ```
-
-### Set up IDE (Optional)
-
-To setup the IDE, please follow these instructions:
-
-- Run VSCode Tasks, by pressing `Ctrl+Shift+P`, selecting `Tasks: Run Task` and running the `setup_python_env` in the drop down menu.
-  When running this task, you will be prompted to add the absolute path to your Isaac Sim installation.
-
-If everything executes correctly, it should create a file .python.env in the `.vscode` directory.
-The file contains the python paths to all the extensions provided by Isaac Sim and Omniverse.
-This helps in indexing all the python modules for intelligent suggestions while writing code.
-
-### Setup as Omniverse Extension (Optional)
-
-We provide an example UI extension that will load upon enabling your extension defined in `source/final_project/final_project/ui_extension_example.py`.
-
-To enable your extension, follow these steps:
-
-1. **Add the search path of this project/repository** to the extension manager:
-    - Navigate to the extension manager using `Window` -> `Extensions`.
-    - Click on the **Hamburger Icon**, then go to `Settings`.
-    - In the `Extension Search Paths`, enter the absolute path to the `source` directory of this project/repository.
-    - If not already present, in the `Extension Search Paths`, enter the path that leads to Isaac Lab's extension directory directory (`IsaacLab/source`)
-    - Click on the **Hamburger Icon**, then click `Refresh`.
-
-2. **Search and enable your extension**:
-    - Find your extension under the `Third Party` category.
-    - Toggle it to enable your extension.
-
-## Code formatting
-
-We have a pre-commit template to automatically format your code.
-To install pre-commit:
+After installing Isaac Lab with its `isaacsim` extra, run:
 
 ```bash
-pip install pre-commit
+cd /path/to/rl_final_project_isaaclab_2026/IsaacLab
+uv add --editable ../rsl_rl --no-sync
+uv add --editable ../final_project/source/final_project --no-sync
+uv sync --extra isaacsim
+
+uv run --extra isaacsim --no-sync python ../final_project/scripts/list_envs.py
 ```
 
-Then you can run pre-commit with:
+This records the course package in Isaac Lab's project dependencies and installs
+it into the same `.venv`. Continue to use `uv run` for the commands below.
+
+Isaac Lab installs `rsl-rl-lib` as a dependency. The editable source declaration
+above selects the sibling checkout instead of the packaged distribution.
+Verify that the environment uses that checkout:
 
 ```bash
-pre-commit run --all-files
+uv run --extra isaacsim --no-sync python -c \
+  "import sys, rsl_rl; print(sys.executable); print(rsl_rl.__file__)"
 ```
 
-## Troubleshooting
+## Check Go2 training and playback
 
-### Pylance Missing Indexing of Extensions
+Run these commands from the `IsaacLab` directory. Logs and checkpoints are saved
+under `logs/rsl_rl/go2_managerbased/` relative to the working directory.
 
-In some VsCode versions, the indexing of part of the extensions is missing.
-In this case, add the path to your extension in `.vscode/settings.json` under the key `"python.analysis.extraPaths"`.
+Start with a short headless check:
 
-```json
-{
-    "python.analysis.extraPaths": [
-        "<path-to-ext-repo>/source/final_project"
-    ]
-}
+```bash
+uv run --extra isaacsim --no-sync python ../final_project/scripts/rsl_rl/train.py \
+  --task Template-Final-Project-v0 --num_envs 16 --max_iterations 10 \
+  --viz none physics=isaacsim_physx
 ```
 
-### Pylance Crash
+For the same check with a window, change `--viz none` to `--viz kit`.
+The 10-iteration run checks execution; it does not establish policy convergence.
 
-If you encounter a crash in `pylance`, it is probable that too many files are indexed and you run out of memory.
-A possible solution is to exclude some of omniverse packages that are not used in your project.
-To do so, modify `.vscode/settings.json` and comment out packages under the key `"python.analysis.extraPaths"`
-Some examples of packages that can likely be excluded are:
+The course training defaults are 4096 environments and 300 iterations. Choose
+`--num_envs` to fit the machine.
 
-```json
-"<path-to-isaac-sim>/extscache/omni.anim.*"         // Animation packages
-"<path-to-isaac-sim>/extscache/omni.kit.*"          // Kit UI tools
-"<path-to-isaac-sim>/extscache/omni.graph.*"        // Graph UI tools
-"<path-to-isaac-sim>/extscache/omni.services.*"     // Services tools
-...
+```bash
+uv run --extra isaacsim --no-sync python ../final_project/scripts/rsl_rl/train.py \
+  --task Template-Final-Project-v0 --viz none physics=isaacsim_physx
 ```
+
+Play a checkpoint produced by this environment:
+
+```bash
+uv run --extra isaacsim --no-sync python ../final_project/scripts/rsl_rl/play.py \
+  --task Template-Final-Project-Play-v0 --num_envs 16 \
+  --checkpoint /absolute/path/to/model_299.pt \
+  --viz kit physics=isaacsim_physx
+```
+
+The scripts delegate training, playback, and dummy-agent execution to Isaac Lab 3.
+Task registration also supports the unified `isaaclab train` and `isaaclab play`
+commands once the package is installed. The `isaaclab.tasks` entry point makes
+course tasks discoverable without editing Isaac Lab's source.
